@@ -1,8 +1,9 @@
-import React, { useRef, useState, useLayoutEffect } from 'react'
+import React, { useRef, useState, useLayoutEffect, useEffect } from 'react'
 import RectangleAnnotation from './annotation/RectangleAnnotation';
 
 function ReportTemplate2(props) {
     const ref = useRef()
+    const boxRef = useRef()
 
     const [selectedImage, setSelectedImage] = useState(undefined);
     const [selectedImage1, setSelectedImage1] = useState(undefined);
@@ -16,19 +17,62 @@ function ReportTemplate2(props) {
         width: 0,
         height: 0
     });
+    // const [boundingRect, setBoundingRect] = useState()
+    const [rectangles, setRectangles] = useState([])
+    const [boundRect, setBoundRect] = useState()
 
-    useLayoutEffect(() => {
-        setImageSize({ width: ref.current.offsetWidth, height: ref.current.offsetHeight });
-    }, []);
+    function handleCreate(newRectangle) {
+        setRectangles([...rectangles, newRectangle]);
+    }
+
+    useEffect(() => {
+
+        setImageSize({ width: ref.current.clientWidth, height: ref.current.clientHeight })
+    }, [])
+
+    useEffect(() => {
+        setBoundRect(boxRef.current)
+    }, [props.annotateState])
+
 
     return (
         <>
-            <div id='report-template-2'>
-                <div ref={props.reportTemplateRef2} className='p-3'>
-                    <RectangleAnnotation />
-                    {/* <div style={{ position: 'absolute', width: '50px', height: '50px', border: '2px solid blue', top: '0' }}>
+            <div id='report-template-2' ref={boxRef}>
+                <div ref={props.reportTemplateRef2} className='p-3' >
+                    {
+                        props.annotateState ? (
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    width: '100%',
+                                    height: '100%',
+                                    border: '1px solid black',
+                                }}
 
+                            >
+                                <RectangleAnnotation onCreate={handleCreate} boundingBox={boundRect} annotateState={props.annotateState} />
+                                {rectangles.map((rectangle, i) => (
+                                    <div
+                                        key={i}
+                                        style={{
+                                            position: "absolute",
+                                            top: Math.min(rectangle.y1, rectangle.y2),
+                                            left: Math.min(rectangle.x1, rectangle.x2),
+                                            width: Math.abs(rectangle.x1 - rectangle.x2),
+                                            height: Math.abs(rectangle.y1 - rectangle.y2),
+                                            border: '1px solid red'
+                                        }}
+                                    />
+                                ))
+                                }
+                            </div>
+                        ) : null
+                    }
+
+
+                    {/* <div style={{ position: 'absolute', width: '50px', height: '50px', border: '2px solid blue', top: '0' }}>
                     </div> */}
+
                     <div className=''>
                         <div className='row gx-0 border border-2 border-dark'>
                             <div className='col-2 border-end border-2 border-dark'>
